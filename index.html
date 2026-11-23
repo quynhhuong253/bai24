@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bài tập 24 - Cao Thị Quỳnh Hương</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh; display: flex; flex-direction: column;
+      background: radial-gradient(circle at top, #2b1055, #120726 75%);
+      color: #fff; font-family: system-ui, sans-serif; overflow-x: hidden;
+    }
+    .student-bar {
+      background: #0f0520; border-bottom: 1px solid rgba(255, 209, 102, 0.35);
+      padding: 10px 16px; display: flex; justify-content: center; flex-wrap: wrap; gap: 24px;
+    }
+    .student-bar strong { color: #ffd166; }
+    .main-menu {
+      background: #1d1135; padding: 12px; display: flex;
+      justify-content: center; flex-wrap: wrap; gap: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .main-menu a {
+      color: #fff; text-decoration: none; padding: 7px 14px;
+      border-radius: 6px; background: rgba(255,255,255,0.08); font-size: 0.9rem;
+    }
+    .main-menu a:hover, .main-menu a.active {
+      background: #ffd166; color: #120726; font-weight: bold;
+    }
+    main {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 30px 16px 60px;
+    }
+    h1 { font-size: 1.65rem; margin-bottom: 8px; text-align: center; }
+    .status { font-size: 0.95rem; color: #ffd166; margin-bottom: 42px; }
+    .scene {
+      width: 240px; height: 280px; perspective: 1100px;
+      position: relative; display: flex; align-items: center; justify-content: center;
+    }
+    .lantern { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; }
+    .face {
+      position: absolute; width: 190px; height: 250px; left: 25px; top: 15px;
+      border-radius: 10px; border: 3px solid #ffd166;
+      box-shadow: 0 0 22px rgba(255, 209, 102, 0.35);
+      overflow: hidden; background: #1d1135; cursor: pointer;
+    }
+    .face:hover { border-color: #4ef2c2; box-shadow: 0 0 28px rgba(78, 242, 194, 0.85); }
+    .face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .caption {
+      position: absolute; bottom: 0; left: 0; right: 0; padding: 6px;
+      background: rgba(0, 0, 0, 0.65); font-size: 0.82rem; text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="student-bar">
+    <span><strong>Họ và tên:</strong> Cao Thị Quỳnh Hương</span>
+    <span><strong>MSSV:</strong> 241A010219</span>
+  </div>
+
+  <nav class="main-menu">
+    <a href="index.html">Đèn Kéo Quân (Trang chủ)</a>
+    <a href="baitap17.html">Bài tập 17</a>
+    <a href="baitap18.html">Bài tập 18</a>
+    <a href="baitap19.html">Bài tập 19</a>
+    <a href="baitap20.html">Bài tập 20</a>
+    <a href="baitap21.html">Bài tập 21</a>
+    <a href="baitap22.html">Bài tập 22</a>
+  </nav>
+  <main>
+    <h1>Đèn Kéo Quân 6 Mặt (JavaScript)</h1>
+    <div class="status" id="status">Trạng thái: Đang quay (Rê chuột vào ảnh để dừng)</div>
+    <div class="scene">
+      <div class="lantern" id="lantern"></div>
+    </div>
+  </main>
+
+  <script>
+    const images = [
+      { src: "anh1.png", label: "Hình 1" },
+      { src: "anh2.png", label: "Hình 2" },
+      { src: "anh3.png", label: "Hình 3" },
+      { src: "anh4.png", label: "Hình 4" },
+      { src: "anh5.png", label: "Hình 5" },
+      { src: "anh6.png", label: "Hình 6" }
+    ];
+
+    const lantern = document.getElementById("lantern");
+    const statusEl = document.getElementById("status");
+    const faceCount = images.length;
+    const angleStep = 360 / faceCount;
+    const radius = Math.round((190 / 2) / Math.tan(Math.PI / faceCount)) + 14;
+
+    let currentAngle = 0;
+    let isPaused = false;
+    let lastTime = null;
+
+    images.forEach((item, index) => {
+      const face = document.createElement("div");
+      face.className = "face";
+      face.style.transform = `rotateY(${index * angleStep}deg) translateZ(${radius}px)`;
+
+      const img = document.createElement("img");
+      img.src = item.src;
+      img.alt = item.label;
+
+      const caption = document.createElement("div");
+      caption.className = "caption";
+      caption.textContent = item.label;
+
+      face.appendChild(img);
+      face.appendChild(caption);
+
+      face.addEventListener("mouseenter", () => {
+        isPaused = true;
+        statusEl.textContent = `Trạng thái: Đã dừng tại ${item.label}`;
+      });
+      face.addEventListener("mouseleave", () => {
+        isPaused = false;
+        lastTime = null;
+        statusEl.textContent = "Trạng thái: Đang quay";
+      });
+
+      lantern.appendChild(face);
+    });
+
+    function animate(timestamp) {
+      if (!isPaused) {
+        if (lastTime !== null) {
+          currentAngle = (currentAngle + 28 * ((timestamp - lastTime) / 1000)) % 360;
+          lantern.style.transform = `rotateY(${currentAngle}deg)`;
+        }
+        lastTime = timestamp;
+      }
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
